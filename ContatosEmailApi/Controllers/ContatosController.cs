@@ -34,7 +34,7 @@ namespace ContatosEmailApi.Controllers
             }
             else
             {
-                SaveTxt();
+                SaveTxt(contato);
             }
 
             return Ok(contato);
@@ -106,117 +106,13 @@ namespace ContatosEmailApi.Controllers
             return Ok(contato);
         }
 
-        private void SaveTxt()
+        private void SaveTxt(Contato contato)
         {
-            string[] lines = { "First line", "Second line", "Third line" };
+
+            string[] lines = { contato.Para, contato.Copia, contato.CopiaOculta, contato.Assunto, contato.Mensagem };
             // WriteAllLines creates a file, writes a collection of strings to the file,
             // and then closes the file.  You do NOT need to call Flush() or Close().
-            System.IO.File.WriteAllLines(@"C:\WriteLines.txt", lines);
-
-
-            // Example #2: Write one string to a text file.
-            string text = "A class is the most powerful data type in C#. Like a structure, " +
-                           "a class defines the data and behavior of the data type. ";
-            // WriteAllText creates a file, writes the specified string to the file,
-            // and then closes the file.    You do NOT need to call Flush() or Close().
-            System.IO.File.WriteAllText(@"C:\WriteText.txt", text);
-
-            // Example #3: Write only some strings in an array to a file.
-            // The using statement automatically flushes AND CLOSES the stream and calls 
-            // IDisposable.Dispose on the stream object.
-            // NOTE: do not use FileStream for text files because it writes bytes, but StreamWriter
-            // encodes the output as text.
-            using (System.IO.StreamWriter file =
-                new System.IO.StreamWriter(@"C:\WriteLines2.txt"))
-            {
-                foreach (string line in lines)
-                {
-                    // If the line doesn't contain the word 'Second', write the line to the file.
-                    if (!line.Contains("Second"))
-                    {
-                        file.WriteLine(line);
-                    }
-                }
-            }
-
-            // Example #4: Append new text to an existing file.
-            // The using statement automatically flushes AND CLOSES the stream and calls 
-            // IDisposable.Dispose on the stream object.
-            using (System.IO.StreamWriter file =
-                new System.IO.StreamWriter(@"C:\WriteLines2.txt", true))
-            {
-                file.WriteLine("Fourth line");
-            }
-        }
-
-        private void sendEmailViaWebApi()
-        {
-            string subject = "Email Subject";
-            string body = "Email body";
-            string FromMail = "shahid@reckonbits.com.pk";
-            string emailTo = "reciever@reckonbits.com.pk";
-            MailMessage mail = new MailMessage();
-            SmtpClient SmtpServer = new SmtpClient("mail.terra.com.pk");
-
-            mail.From = new MailAddress(FromMail);
-            mail.To.Add(emailTo);
-            mail.Subject = subject;
-            mail.Body = body;
-
-            SmtpServer.Port = 25;
-            SmtpServer.Credentials = new System.Net.NetworkCredential("shahid@reckonbits.com.pk", "your password");
-            SmtpServer.EnableSsl = false;
-            SmtpServer.Send(mail);
-        }
-
-        [ResponseType(typeof(void))]
-        public IHttpActionResult SendEmailToContato(int id)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            Contato contato = db.Contatos.Find(id);
-
-            if (id != contato.Id)
-            {
-                return BadRequest();
-            }
-
-            if (contato != null)
-            {
-                try
-                {
-                    string subject = contato.Assunto;
-                    string body = contato.Mensagem;
-                    string FromMail = "no_reply@apphb.com";
-                    string emailTo = contato.Para;
-                    MailMessage mail = new MailMessage();
-                    SmtpClient SmtpServer = new SmtpClient("smtp.poa.terra.com.br");
-
-                    mail.From = new MailAddress(FromMail);
-                    mail.To.Add(emailTo);
-                    mail.Subject = subject;
-                    mail.Body = body;
-
-                    SmtpServer.Port = 465;
-                    SmtpServer.Credentials = new System.Net.NetworkCredential("gilbertoluis@terra.com.br", "g9m8p5s4");
-                    SmtpServer.EnableSsl = false;
-                    SmtpServer.Send(mail);
-                }
-                catch
-                {
-                    throw;
-                }
-                
-            }
-            else
-            {
-                return NotFound();
-            }
-
-            return StatusCode(HttpStatusCode.NoContent);
+            System.IO.File.WriteAllLines(@"C:\Email.txt", lines);
         }
 
         protected override void Dispose(bool disposing)
