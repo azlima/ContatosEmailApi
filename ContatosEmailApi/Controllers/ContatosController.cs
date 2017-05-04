@@ -10,6 +10,7 @@ using System.Web.Http;
 using System.Web.Http.Description;
 using ContatosEmailApi.Models;
 using System.Net.Mail;
+using System.IO;
 
 namespace ContatosEmailApi.Controllers
 {
@@ -108,11 +109,16 @@ namespace ContatosEmailApi.Controllers
 
         private void SaveTxt(Contato contato)
         {
-
             string[] lines = { contato.Para, contato.Copia, contato.CopiaOculta, contato.Assunto, contato.Mensagem };
-            // WriteAllLines creates a file, writes a collection of strings to the file,
-            // and then closes the file.  You do NOT need to call Flush() or Close().
-            System.IO.File.WriteAllLines(@"C:\Email.txt", lines);
+
+            string mydocpath =
+                Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+
+            using (StreamWriter outputFile = new StreamWriter(mydocpath + @"\Email.txt"))
+            {
+                foreach (string line in lines)
+                    outputFile.WriteLine(line);
+            }
         }
 
         protected override void Dispose(bool disposing)
