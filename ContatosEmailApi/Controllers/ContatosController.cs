@@ -32,6 +32,10 @@ namespace ContatosEmailApi.Controllers
             {
                 return NotFound();
             }
+            else
+            {
+                SendEmailToContato(id);
+            }
 
             return Ok(contato);
         }
