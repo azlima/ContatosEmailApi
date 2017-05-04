@@ -1,16 +1,13 @@
-﻿using System;
+﻿using ContatosEmailApi.Models;
+using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
+using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Description;
-using ContatosEmailApi.Models;
-using System.Net.Mail;
-using System.IO;
 
 namespace ContatosEmailApi.Controllers
 {
@@ -107,20 +104,6 @@ namespace ContatosEmailApi.Controllers
             return Ok(contato);
         }
 
-        private void SaveTxt(Contato contato)
-        {
-            string[] lines = { contato.Para, contato.Copia, contato.CopiaOculta, contato.Assunto, contato.Mensagem };
-
-            string mydocpath =
-                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-
-            using (StreamWriter outputFile = new StreamWriter(mydocpath + @"\Email.txt"))
-            {
-                foreach (string line in lines)
-                    outputFile.WriteLine(line);
-            }
-        }
-
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -133,6 +116,35 @@ namespace ContatosEmailApi.Controllers
         private bool ContatoExists(int id)
         {
             return db.Contatos.Count(e => e.Id == id) > 0;
+        }
+
+        private void SaveTxt(Contato contato)
+        {
+            IList<string> linhas = new List<string>();
+
+            linhas.Add(string.Format("Para: {0}", contato.Para));
+
+            if (!string.IsNullOrEmpty(contato.Copia))
+            {
+                linhas.Add(string.Format("Cópia: {0}", contato.Copia));
+            }
+
+            if (!string.IsNullOrEmpty(contato.CopiaOculta))
+            {
+                linhas.Add(string.Format("Cópia Oculta: {0}", contato.CopiaOculta));
+            }
+
+            linhas.Add(string.Format("Assunto: {0}", contato.Assunto));
+            linhas.Add(string.Format("Mensagem: {0}", contato.Mensagem));
+
+            string documentoDiretorio =
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+            using (StreamWriter arquivoSaida = new StreamWriter(documentoDiretorio + @"\Email.txt"))
+            {
+                foreach (string linha in linhas)
+                    arquivoSaida.WriteLine(linha);
+            }
         }
     }
 }
