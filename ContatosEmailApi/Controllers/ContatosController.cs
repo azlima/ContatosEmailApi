@@ -112,7 +112,7 @@ namespace ContatosEmailApi.Controllers
             string[] lines = { contato.Para, contato.Copia, contato.CopiaOculta, contato.Assunto, contato.Mensagem };
 
             string mydocpath =
-                Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
             using (StreamWriter outputFile = new StreamWriter(mydocpath + @"\Email.txt"))
             {
