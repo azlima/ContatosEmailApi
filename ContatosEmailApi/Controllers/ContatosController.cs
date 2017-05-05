@@ -7,6 +7,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Web.Http;
 using System.Web.Http.Description;
 
@@ -103,13 +106,13 @@ namespace ContatosEmailApi.Controllers
 
         [HttpGet]
         [ActionName("arquivo")]
-        public void SaveAndOpenTxt(int contatoId)
+        public HttpResponseMessage SaveAndOpenTxt(int contatoId)
         {
             IList<string> linhas = new List<string>();
 
             Contato contato = db.Contatos.Find(contatoId);
-            if (contato != null)
-            {
+            //if (contato != null)
+            //{
                 linhas.Add(string.Format("Para: {0}", contato.Para));
 
                 if (!string.IsNullOrEmpty(contato.Copia))
@@ -128,17 +131,43 @@ namespace ContatosEmailApi.Controllers
                 string documentoDiretorio =
                     Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
-                using (StreamWriter arquivoSaida = new StreamWriter(documentoDiretorio + @"\Email.txt"))
+                var txtBuilder = new StringBuilder();
+
+                foreach (string linha in linhas)
                 {
-                    foreach (string linha in linhas)
-                    {
-                        arquivoSaida.WriteLine(linha);
-                    }
-                    arquivoSaida.Dispose();
-                    //Process.Start("notepad.exe", documentoDiretorio + @"\Email.txt");
-                    Process.Start("notepad.exe", "Teste");
+                    txtBuilder.AppendLine(linha);
                 }
-            }
+
+                var txtContent = txtBuilder.ToString();
+                var txtStream = new MemoryStream(Encoding.UTF8.GetBytes(txtContent));
+
+                HttpResponseMessage result = new HttpResponseMessage(HttpStatusCode.OK);
+                result.Content = new StreamContent(txtStream);
+                result.Content.Headers.ContentType = new MediaTypeHeaderValue("text/plain"); //text/plain
+                result.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment")
+                {
+                    FileName = documentoDiretorio + @"\Email.txt" // Not sure about that part. You can change to "text.txt" to try
+                };
+                using (FileStream file = new FileStream(documentoDiretorio + @"\Email.txt", FileMode.Create))
+                {
+                    byte[] bytes = new byte[file.Length];
+                    file.Read(bytes, 0, (int)file.Length);
+                    txtStream.Write(bytes, 0, (int)file.Length);
+                }
+                Process.Start("notepad.exe", documentoDiretorio + @"\Email.txt");
+                return result;
+
+                //using (StreamWriter arquivoSaida = new StreamWriter(documentoDiretorio + @"\Email.txt"))
+                //{
+                //    foreach (string linha in linhas)
+                //    {
+                //        arquivoSaida.WriteLine(linha);
+                //    }
+                //    arquivoSaida.Dispose();
+                //    //Process.Start("notepad.exe", documentoDiretorio + @"\Email.txt");
+                //    Process.Start("notepad.exe", "Teste");
+                //}
+            //}
         }
 
         protected override void Dispose(bool disposing)
