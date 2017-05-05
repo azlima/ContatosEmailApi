@@ -19,6 +19,11 @@ namespace ContatosEmailApi
                 routeTemplate: "api/{controller}/{id}",
                 defaults: new { id = RouteParameter.Optional }
             );
+
+            config.Routes.MapHttpRoute(
+                name: "CustomActionApi",
+                routeTemplate: "api/{controller}/{action}/{contatoid}"
+            );
         }
     }
 }

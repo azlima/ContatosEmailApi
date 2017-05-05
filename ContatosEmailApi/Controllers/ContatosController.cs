@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -29,10 +30,6 @@ namespace ContatosEmailApi.Controllers
             if (contato == null)
             {
                 return NotFound();
-            }
-            else
-            {
-                SaveTxt(contato);
             }
 
             return Ok(contato);
@@ -104,6 +101,45 @@ namespace ContatosEmailApi.Controllers
             return Ok(contato);
         }
 
+        [HttpGet]
+        [ActionName("arquivo")]
+        public void SaveAndOpenTxt(int contatoId)
+        {
+            IList<string> linhas = new List<string>();
+
+            Contato contato = db.Contatos.Find(contatoId);
+            if (contato != null)
+            {
+                linhas.Add(string.Format("Para: {0}", contato.Para));
+
+                if (!string.IsNullOrEmpty(contato.Copia))
+                {
+                    linhas.Add(string.Format("Cópia: {0}", contato.Copia));
+                }
+
+                if (!string.IsNullOrEmpty(contato.CopiaOculta))
+                {
+                    linhas.Add(string.Format("Cópia Oculta: {0}", contato.CopiaOculta));
+                }
+
+                linhas.Add(string.Format("Assunto: {0}", contato.Assunto));
+                linhas.Add(string.Format("Mensagem: {0}", contato.Mensagem));
+
+                string documentoDiretorio =
+                    Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+                using (StreamWriter arquivoSaida = new StreamWriter(documentoDiretorio + @"\Email.txt"))
+                {
+                    foreach (string linha in linhas)
+                    {
+                        arquivoSaida.WriteLine(linha);
+                    }
+                    arquivoSaida.Dispose();
+                    Process.Start("notepad.exe", documentoDiretorio + @"\Email.txt");
+                }
+            }
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -116,35 +152,6 @@ namespace ContatosEmailApi.Controllers
         private bool ContatoExists(int id)
         {
             return db.Contatos.Count(e => e.Id == id) > 0;
-        }
-
-        private void SaveTxt(Contato contato)
-        {
-            IList<string> linhas = new List<string>();
-
-            linhas.Add(string.Format("Para: {0}", contato.Para));
-
-            if (!string.IsNullOrEmpty(contato.Copia))
-            {
-                linhas.Add(string.Format("Cópia: {0}", contato.Copia));
-            }
-
-            if (!string.IsNullOrEmpty(contato.CopiaOculta))
-            {
-                linhas.Add(string.Format("Cópia Oculta: {0}", contato.CopiaOculta));
-            }
-
-            linhas.Add(string.Format("Assunto: {0}", contato.Assunto));
-            linhas.Add(string.Format("Mensagem: {0}", contato.Mensagem));
-
-            string documentoDiretorio =
-                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-
-            using (StreamWriter arquivoSaida = new StreamWriter(documentoDiretorio + @"\Email.txt"))
-            {
-                foreach (string linha in linhas)
-                    arquivoSaida.WriteLine(linha);
-            }
         }
     }
 }
