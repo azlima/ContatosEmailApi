@@ -142,6 +142,7 @@ namespace ContatosEmailApi.Controllers
                 FileStream file = new FileStream(fullSavePath, FileMode.Create, FileAccess.Write);
                 ms.WriteTo(file);
                 file.Dispose();
+                Process.Start("notepad.exe", fullSavePath);
                 result = Request.CreateResponse(HttpStatusCode.OK);
                 result.Content = new StreamContent(new FileStream(fullSavePath, FileMode.Open, FileAccess.Read));
                 result.Content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("attachment");
