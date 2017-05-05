@@ -10,6 +10,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Web;
 using System.Web.Http;
 using System.Web.Http.Description;
 
@@ -106,7 +107,7 @@ namespace ContatosEmailApi.Controllers
 
         [HttpGet]
         [ActionName("arquivo")]
-        public HttpResponseMessage SaveAndOpenTxt(int contatoId)
+        public void SaveAndOpenTxt(int contatoId)
         {
             IList<string> linhas = new List<string>();
 
@@ -128,34 +129,51 @@ namespace ContatosEmailApi.Controllers
                 linhas.Add(string.Format("Assunto: {0}", contato.Assunto));
                 linhas.Add(string.Format("Mensagem: {0}", contato.Mensagem));
 
-                string documentoDiretorio =
-                    Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                //string documentoDiretorio =
+                //    Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
-                var txtBuilder = new StringBuilder();
+                string documentoDiretorio = HttpContext.Current.Server.MapPath("~/EmailFile/");
 
-                foreach (string linha in linhas)
+                //var txtBuilder = new StringBuilder();
+
+                //foreach (string linha in linhas)
+                //{
+                //    txtBuilder.AppendLine(linha);
+                //}
+
+                //var txtContent = txtBuilder.ToString();
+                //var txtStream = new MemoryStream(Encoding.UTF8.GetBytes(txtContent));
+
+                //HttpResponseMessage result = new HttpResponseMessage(HttpStatusCode.OK);
+                //result.Content = new StreamContent(txtStream);
+                //result.Content.Headers.ContentType = new MediaTypeHeaderValue("text/plain"); //text/plain
+                //result.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment")
+                //{
+                //    FileName = documentoDiretorio + @"\Email.txt" // Not sure about that part. You can change to "text.txt" to try
+                //};
+
+
+
+                //using (FileStream file = new FileStream(documentoDiretorio + @"\Email.txt", FileMode.Create))
+                //{
+                //    byte[] bytes = new byte[file.Length];
+                //    file.Read(bytes, 0, (int)file.Length);
+                //    txtStream.Write(bytes, 0, (int)file.Length);
+                //}
+
+            
+                //Process.Start("notepad.exe", documentoDiretorio + @"\Email.txt");
+                //return result;
+
+                using (StreamWriter arquivoSaida = new StreamWriter(documentoDiretorio + @"\Email.txt"))
                 {
-                    txtBuilder.AppendLine(linha);
+                    foreach (string linha in linhas)
+                    {
+                        arquivoSaida.WriteLine(linha);
+                    }
+                    arquivoSaida.Dispose();
+                    Process.Start("notepad.exe", documentoDiretorio + @"\Email.txt");
                 }
-
-                var txtContent = txtBuilder.ToString();
-                var txtStream = new MemoryStream(Encoding.UTF8.GetBytes(txtContent));
-
-                HttpResponseMessage result = new HttpResponseMessage(HttpStatusCode.OK);
-                result.Content = new StreamContent(txtStream);
-                result.Content.Headers.ContentType = new MediaTypeHeaderValue("text/plain"); //text/plain
-                result.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment")
-                {
-                    FileName = documentoDiretorio + @"\Email.txt" // Not sure about that part. You can change to "text.txt" to try
-                };
-                using (FileStream file = new FileStream(documentoDiretorio + @"\Email.txt", FileMode.Create))
-                {
-                    byte[] bytes = new byte[file.Length];
-                    file.Read(bytes, 0, (int)file.Length);
-                    txtStream.Write(bytes, 0, (int)file.Length);
-                }
-                Process.Start("notepad.exe", documentoDiretorio + @"\Email.txt");
-                return result;
 
                 //using (StreamWriter arquivoSaida = new StreamWriter(documentoDiretorio + @"\Email.txt"))
                 //{
