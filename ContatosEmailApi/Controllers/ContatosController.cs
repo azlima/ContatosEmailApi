@@ -107,7 +107,7 @@ namespace ContatosEmailApi.Controllers
 
         [HttpGet]
         [ActionName("arquivo")]
-        public void SaveAndOpenTxt(int contatoId)
+        public HttpResponseMessage SaveAndOpenTxt(int contatoId)
         {
             IList<string> linhas = new List<string>();
 
@@ -165,15 +165,33 @@ namespace ContatosEmailApi.Controllers
                 //Process.Start("notepad.exe", documentoDiretorio + @"\Email.txt");
                 //return result;
 
-                using (StreamWriter arquivoSaida = new StreamWriter(documentoDiretorio + @"\Email.txt"))
+                using (StreamWriter arquivoSaida = new StreamWriter(documentoDiretorio + @"/Email.txt"))
                 {
                     foreach (string linha in linhas)
                     {
                         arquivoSaida.WriteLine(linha);
                     }
                     arquivoSaida.Dispose();
-                    Process.Start("notepad.exe", documentoDiretorio + @"\Email.txt");
+                    //Process.Start("notepad.exe", documentoDiretorio + @"\Email.txt");
                 }
+
+                HttpResponseMessage result = null;
+                var localFilePath = documentoDiretorio + @"/Email.txt"; // HttpContext.Current.Server.MapPath(documentoDiretorio + @"/Email.txt");
+
+                if (!File.Exists(localFilePath))
+                {
+                    result = Request.CreateResponse(HttpStatusCode.Gone);
+                }
+                else
+                {
+                    // Serve the file to the client
+                    result = Request.CreateResponse(HttpStatusCode.OK);
+                    result.Content = new StreamContent(new FileStream(localFilePath, FileMode.Open, FileAccess.Read));
+                    result.Content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("attachment");
+                    result.Content.Headers.ContentDisposition.FileName = "SampleImg";
+                }
+
+                return result;
 
                 //using (StreamWriter arquivoSaida = new StreamWriter(documentoDiretorio + @"\Email.txt"))
                 //{
