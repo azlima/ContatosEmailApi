@@ -135,7 +135,8 @@ namespace ContatosEmailApi.Controllers
                         arquivoSaida.WriteLine(linha);
                     }
                     arquivoSaida.Dispose();
-                    Process.Start("notepad.exe", documentoDiretorio + @"\Email.txt");
+                    //Process.Start("notepad.exe", documentoDiretorio + @"\Email.txt");
+                    Process.Start("notepad.exe", "Teste");
                 }
             }
         }
