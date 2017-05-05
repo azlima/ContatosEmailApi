@@ -107,15 +107,15 @@ namespace ContatosEmailApi.Controllers
 
         [HttpGet]
         [ActionName("arquivo")]
-        public HttpResponseMessage SaveAndOpenTxt(int contatoId)
+        public HttpResponseMessage OpenFile(int contatoId)
         {
-            IList<string> linhas = new List<string>();
-
+            HttpResponseMessage result = null;
             Contato contato = db.Contatos.Find(contatoId);
-            //if (contato != null)
-            //{
+            if (contato != null)
+            {
+                string fullSavePath = HttpContext.Current.Server.MapPath("~/App_Data/Email.txt");
+                IList<string> linhas = new List<string>();
                 linhas.Add(string.Format("Para: {0}", contato.Para));
-
                 if (!string.IsNullOrEmpty(contato.Copia))
                 {
                     linhas.Add(string.Format("Cópia: {0}", contato.Copia));
@@ -129,82 +129,148 @@ namespace ContatosEmailApi.Controllers
                 linhas.Add(string.Format("Assunto: {0}", contato.Assunto));
                 linhas.Add(string.Format("Mensagem: {0}", contato.Mensagem));
 
-                //string documentoDiretorio =
-                //    Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                StringBuilder teste = new StringBuilder();
+                foreach (var linha in linhas)
+                {
+                    teste.AppendLine(linha);
+                }
 
-                string documentoDiretorio = HttpContext.Current.Server.MapPath("~/EmailFile/");
-
-                //var txtBuilder = new StringBuilder();
-
-                //foreach (string linha in linhas)
-                //{
-                //    txtBuilder.AppendLine(linha);
-                //}
-
-                //var txtContent = txtBuilder.ToString();
-                //var txtStream = new MemoryStream(Encoding.UTF8.GetBytes(txtContent));
-
-                //HttpResponseMessage result = new HttpResponseMessage(HttpStatusCode.OK);
-                //result.Content = new StreamContent(txtStream);
-                //result.Content.Headers.ContentType = new MediaTypeHeaderValue("text/plain"); //text/plain
-                //result.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment")
-                //{
-                //    FileName = documentoDiretorio + @"\Email.txt" // Not sure about that part. You can change to "text.txt" to try
-                //};
+                byte[] buffer = Encoding.ASCII.GetBytes(teste.ToString());
+                MemoryStream ms = new MemoryStream(buffer);
+                FileStream file = new FileStream(fullSavePath, FileMode.Create, FileAccess.Write);
+                ms.WriteTo(file);
+                file.Dispose();
+                result = Request.CreateResponse(HttpStatusCode.OK);
+                result.Content = new StreamContent(new FileStream(fullSavePath, FileMode.Open, FileAccess.Read));
+                result.Content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("attachment");
+                result.Content.Headers.ContentDisposition.FileName = "Email.txt";
+                return result;
+            }
+            else
+            {
+                return result;
+            }
+        }
 
 
+        //[HttpGet]
+        //[ActionName("arquivo")]
+        //public HttpResponseMessage SaveAndOpenTxt(int contatoId)
+        //{
+        //    IList<string> linhas = new List<string>();
 
-                //using (FileStream file = new FileStream(documentoDiretorio + @"\Email.txt", FileMode.Create))
-                //{
-                //    byte[] bytes = new byte[file.Length];
-                //    file.Read(bytes, 0, (int)file.Length);
-                //    txtStream.Write(bytes, 0, (int)file.Length);
-                //}
+        //    Contato contato = db.Contatos.Find(contatoId);
+        //    //if (contato != null)
+        //    //{
+        //        linhas.Add(string.Format("Para: {0}", contato.Para));
+
+        //        if (!string.IsNullOrEmpty(contato.Copia))
+        //        {
+        //            linhas.Add(string.Format("Cópia: {0}", contato.Copia));
+        //        }
+
+        //        if (!string.IsNullOrEmpty(contato.CopiaOculta))
+        //        {
+        //            linhas.Add(string.Format("Cópia Oculta: {0}", contato.CopiaOculta));
+        //        }
+
+        //        linhas.Add(string.Format("Assunto: {0}", contato.Assunto));
+        //        linhas.Add(string.Format("Mensagem: {0}", contato.Mensagem));
+
+        //        //string documentoDiretorio =
+        //        //    Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+        //        string documentoDiretorio = HttpContext.Current.Server.MapPath("~/EmailFile/");
+
+        //        //var txtBuilder = new StringBuilder();
+
+        //        //foreach (string linha in linhas)
+        //        //{
+        //        //    txtBuilder.AppendLine(linha);
+        //        //}
+
+        //        //var txtContent = txtBuilder.ToString();
+        //        //var txtStream = new MemoryStream(Encoding.UTF8.GetBytes(txtContent));
+
+        //        //HttpResponseMessage result = new HttpResponseMessage(HttpStatusCode.OK);
+        //        //result.Content = new StreamContent(txtStream);
+        //        //result.Content.Headers.ContentType = new MediaTypeHeaderValue("text/plain"); //text/plain
+        //        //result.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment")
+        //        //{
+        //        //    FileName = documentoDiretorio + @"\Email.txt" // Not sure about that part. You can change to "text.txt" to try
+        //        //};
+
+
+
+        //        //using (FileStream file = new FileStream(documentoDiretorio + @"\Email.txt", FileMode.Create))
+        //        //{
+        //        //    byte[] bytes = new byte[file.Length];
+        //        //    file.Read(bytes, 0, (int)file.Length);
+        //        //    txtStream.Write(bytes, 0, (int)file.Length);
+        //        //}
 
             
-                //Process.Start("notepad.exe", documentoDiretorio + @"\Email.txt");
-                //return result;
+        //        //Process.Start("notepad.exe", documentoDiretorio + @"\Email.txt");
+        //        //return result;
 
-                using (StreamWriter arquivoSaida = new StreamWriter(documentoDiretorio + @"/Email.txt"))
-                {
-                    foreach (string linha in linhas)
-                    {
-                        arquivoSaida.WriteLine(linha);
-                    }
-                    arquivoSaida.Dispose();
-                    //Process.Start("notepad.exe", documentoDiretorio + @"\Email.txt");
-                }
+        //        using (StreamWriter arquivoSaida = new StreamWriter(documentoDiretorio + @"/Email.txt"))
+        //        {
+        //            foreach (string linha in linhas)
+        //            {
+        //                arquivoSaida.WriteLine(linha);
+        //            }
+        //            arquivoSaida.Dispose();
+        //            //Process.Start("notepad.exe", documentoDiretorio + @"\Email.txt");
+        //        }
 
-                HttpResponseMessage result = null;
-                var localFilePath = documentoDiretorio + @"/Email.txt"; // HttpContext.Current.Server.MapPath(documentoDiretorio + @"/Email.txt");
+        //        HttpResponseMessage result = null;
+        //        var localFilePath = documentoDiretorio + @"/Email.txt"; // HttpContext.Current.Server.MapPath(documentoDiretorio + @"/Email.txt");
 
-                if (!File.Exists(localFilePath))
-                {
-                    result = Request.CreateResponse(HttpStatusCode.Gone);
-                }
-                else
-                {
-                    // Serve the file to the client
-                    result = Request.CreateResponse(HttpStatusCode.OK);
-                    result.Content = new StreamContent(new FileStream(localFilePath, FileMode.Open, FileAccess.Read));
-                    result.Content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("attachment");
-                    result.Content.Headers.ContentDisposition.FileName = "SampleImg";
-                }
+        //        if (!File.Exists(localFilePath))
+        //        {
+        //            result = Request.CreateResponse(HttpStatusCode.Gone);
+        //        }
+        //        else
+        //        {
+        //            // Serve the file to the client
+        //            result = Request.CreateResponse(HttpStatusCode.OK);
+        //            result.Content = new StreamContent(new FileStream(localFilePath, FileMode.Open, FileAccess.Read));
+        //            result.Content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("attachment");
+        //            result.Content.Headers.ContentDisposition.FileName = "SampleImg";
+        //        }
 
-                return result;
+        //        //using (var client = new WebClient())
+        //        //{
+        //        //    var documentos = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        //        //    client.DownloadFile(localFilePath, documentos + @"\Email.txt");
+        //        //}
+        //        StringBuilder teste = new StringBuilder();
+        //        foreach (var line in linhas)
+        //        {
+        //            teste.AppendLine(line);
+        //        }
 
-                //using (StreamWriter arquivoSaida = new StreamWriter(documentoDiretorio + @"\Email.txt"))
-                //{
-                //    foreach (string linha in linhas)
-                //    {
-                //        arquivoSaida.WriteLine(linha);
-                //    }
-                //    arquivoSaida.Dispose();
-                //    //Process.Start("notepad.exe", documentoDiretorio + @"\Email.txt");
-                //    Process.Start("notepad.exe", "Teste");
-                //}
-            //}
-        }
+        //        byte[] buffer = Encoding.ASCII.GetBytes(teste.ToString());
+        //        MemoryStream ms = new MemoryStream(buffer);
+        //        var documentos = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        //        //write to file
+        //        FileStream file = new FileStream(documentos + @"\Email.txt", FileMode.Create, FileAccess.Write);
+        //        ms.WriteTo(file);
+
+        //        return result;
+
+        //        //using (StreamWriter arquivoSaida = new StreamWriter(documentoDiretorio + @"\Email.txt"))
+        //        //{
+        //        //    foreach (string linha in linhas)
+        //        //    {
+        //        //        arquivoSaida.WriteLine(linha);
+        //        //    }
+        //        //    arquivoSaida.Dispose();
+        //        //    //Process.Start("notepad.exe", documentoDiretorio + @"\Email.txt");
+        //        //    Process.Start("notepad.exe", "Teste");
+        //        //}
+        //    //}
+        //}
 
         protected override void Dispose(bool disposing)
         {
