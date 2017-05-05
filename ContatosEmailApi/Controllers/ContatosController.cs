@@ -10,6 +10,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 using System.Web.Http.Description;
@@ -106,6 +107,7 @@ namespace ContatosEmailApi.Controllers
         }
 
         [HttpGet]
+        //[Authorize]
         [ActionName("arquivo")]
         public HttpResponseMessage OpenFile(int contatoId)
         {
@@ -144,6 +146,16 @@ namespace ContatosEmailApi.Controllers
                 result.Content = new StreamContent(new FileStream(fullSavePath, FileMode.Open, FileAccess.Read));
                 result.Content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("attachment");
                 result.Content.Headers.ContentDisposition.FileName = "Email.txt";
+
+                //HttpResponseMessage arquivo = new HttpResponseMessage();
+                //using (HttpClient httpClient = new HttpClient())
+                //{
+                //    WebClient clinete = new WebClient();
+                //    clinete.DownloadData(fullSavePath);
+                //    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(UTF8Encoding.UTF8.GetBytes(teste.ToString())));
+                //    arquivo = result;
+                //}
+
                 return result;
             }
             else
