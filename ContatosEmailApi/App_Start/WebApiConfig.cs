@@ -11,7 +11,6 @@ namespace ContatosEmailApi
         public static void Register(HttpConfiguration config)
         {
             // Web API configuration and services
-            //var cors = new EnableCorsAttribute("*", "*", "*", "*");
             config.EnableCors();
 
             // Web API routes
