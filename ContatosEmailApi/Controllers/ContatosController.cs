@@ -41,6 +41,7 @@ namespace ContatosEmailApi.Controllers
         }
 
         // PUT: api/Contatos/5
+        [Authorize]
         [ResponseType(typeof(void))]
         public IHttpActionResult PutContato(int id, Contato contato)
         {
@@ -76,6 +77,8 @@ namespace ContatosEmailApi.Controllers
         }
 
         // POST: api/Contatos
+        //[AllowAnonymous]
+        //[AcceptVerbs("OPTIONS")]
         [ResponseType(typeof(Contato))]
         public IHttpActionResult PostContato(Contato contato)
         {
