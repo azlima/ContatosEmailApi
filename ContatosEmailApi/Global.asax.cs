@@ -22,7 +22,6 @@ namespace ContatosEmailApi
 
         protected void Application_BeginRequest(Object sender, EventArgs e)
         {
-            //HttpContext.Current.Response.AddHeader("Access-Control-Allow-Origin", "*");
             if (HttpContext.Current.Request.HttpMethod == "OPTIONS")
             {
                 HttpContext.Current.Response.AddHeader("Cache-Control", "no-cache");
